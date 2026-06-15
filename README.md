@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+Это сайт-портфолио фотографа на [Next.js](https://nextjs.org). Проект разрабатывается для российского рынка и используется как дипломная работа.
 
-## Getting Started
+## Стек
 
-First, run the development server:
+- **Next.js 16** (App Router) + **React 19**
+- **SQLite** (`better-sqlite3`) — отзывы
+- **Яндекс.Диск API** — фотографии с локальным кешем
+- **Swiper** — слайдеры
+- **CSS Modules** + шрифт **Jura**
+
+## Первый запуск после клонирования
+
+```bash
+npm install
+cp .env.example .env.local   # Windows: copy .env.example .env.local
+```
+
+Заполните `.env.local` токеном и путями Яндекс.Диска, затем:
+
+```bash
+npm run sync:yandex
+npm run dev
+```
+
+Сайт: [http://localhost:3000](http://localhost:3000)
+
+## Кеш фотографий с Яндекс.Диска
+
+Фотографии хранятся на Яндекс.Диске и скачиваются в локальный кеш проекта. Переменные окружения:
+
+- `YANDEX_DISK_TOKEN` — OAuth-токен Яндекс.Диска;
+- `YANDEX_DISK_WEDDINGS_PATH` — папка со свадебными фотосессиями;
+- `YANDEX_DISK_EVENTS_PATH` — папка с остальными мероприятиями.
+
+Ожидаемая структура на Яндекс.Диске:
+
+```text
+/portfolio
+  /weddings
+    /Свадьба Ивановых
+      photo-1.jpg
+  /events
+    /Корпоратив 2026
+      photo-1.jpg
+```
+
+Внутри `weddings` и `events` каждая папка — одна фотосессия.
+
+```bash
+npm run sync:yandex
+```
+
+Скрипт скачивает изображения в `public/cache/photos`, определяет ориентацию и создаёт `manifest.json`.
+
+## Отзывы
+
+Регистрации нет. Форма на `/reviews`: имя, дата, тип мероприятия, текст. Данные сохраняются в `data/reviews.sqlite`.
+
+## Команды
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
+npm run start
+npm run lint
+npm run sync:yandex
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Что не попадает в Git
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- `.env.local` — секреты
+- `node_modules`, `.next`
+- `data/` — локальная база отзывов
+- `public/cache/photos/` — скачанные фото (только `.gitkeep`)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+После клонирования нужно заново выполнить `npm run sync:yandex`.

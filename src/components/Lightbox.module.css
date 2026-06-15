@@ -1,0 +1,101 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    background: rgba(0, 0, 0, 0.88);
+}
+
+.imageWrap {
+    position: relative;
+    max-width: min(92vw, 1280px);
+    max-height: 88vh;
+}
+
+.image {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 82vh;
+    object-fit: contain;
+    display: block;
+}
+
+.caption {
+    margin: 12px 0 0;
+    color: #fff;
+    text-align: center;
+    font-size: 16px;
+}
+
+.closeButton,
+.navButton {
+    border: 0;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.14);
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.closeButton:hover,
+.navButton:hover {
+    background: rgba(255, 255, 255, 0.24);
+    transform: scale(1.04);
+}
+
+.closeButton {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    font-size: 34px;
+    line-height: 1;
+}
+
+.navButton {
+    position: absolute;
+    top: 50%;
+    width: 52px;
+    height: 72px;
+    border-radius: 999px;
+    font-size: 54px;
+    line-height: 0.8;
+}
+
+.prevButton {
+    left: 24px;
+}
+
+.nextButton {
+    right: 24px;
+}
+
+@media (max-width: 768px) {
+    .overlay {
+        padding: 18px;
+    }
+
+    .closeButton {
+        top: 14px;
+        right: 14px;
+    }
+
+    .navButton {
+        width: 42px;
+        height: 58px;
+        font-size: 42px;
+    }
+
+    .prevButton {
+        left: 10px;
+    }
+
+    .nextButton {
+        right: 10px;
+    }
+}

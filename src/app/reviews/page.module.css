@@ -1,0 +1,402 @@
+.reviewsPage {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 44px var(--page-padding) 72px;
+}
+
+.title {
+  margin-bottom: 32px;
+  text-align: center;
+  font-size: clamp(32px, 5vw, 40px);
+}
+
+.reviewsSwiper {
+  width: 100%;
+  padding: 80px 0;
+  overflow: hidden;
+}
+
+.review_slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 360px;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+.review_card {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #000;
+  border-radius: 25px;
+  padding: 20px;
+  width: 100%;
+  height: 260px;
+  background: #fff;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  transition: height 0.35s ease, padding 0.35s ease, transform 0.35s ease;
+}
+
+.review_card h3 {
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+
+.review_card span {
+  display: block;
+  margin-bottom: 18px;
+  color: #555;
+  font-size: 14px;
+}
+
+.review_card p {
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+}
+
+.review_slide_0 {
+  z-index: 5;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.review_slide_0 .review_card {
+  height: 320px;
+  padding: 28px;
+  text-align: center;
+  transform: scaleX(1.18);
+}
+
+.review_slide_1 {
+  z-index: 4;
+  opacity: 0.86;
+  transform: scale(0.82);
+}
+
+.review_slide_2 {
+  z-index: 3;
+  opacity: 0.62;
+  transform: scale(0.64);
+}
+
+.review_slide_0 h3 {
+  font-size: 28px;
+}
+
+.review_slide_0 p {
+  font-size: 18px;
+  -webkit-line-clamp: 6;
+}
+
+.formSection {
+  margin: 56px auto 0;
+  max-width: 720px;
+  border: 2px solid #000;
+  border-radius: 28px;
+  padding: 32px;
+  background: #fff;
+}
+
+.formSection h2 {
+  margin-bottom: 24px;
+  font-size: clamp(26px, 4vw, 32px);
+}
+
+.reviewForm {
+  display: grid;
+  gap: 18px;
+}
+
+.reviewForm label {
+  display: grid;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.reviewForm input,
+.reviewForm textarea {
+  width: 100%;
+  border: 1px solid #999;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font: inherit;
+  background: #f7f7f7;
+}
+
+.reviewForm textarea {
+  resize: vertical;
+}
+
+.reviewForm button {
+  width: fit-content;
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 24px;
+  background: #111;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.reviewForm button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.success,
+.error {
+  margin-top: 16px;
+  font-weight: 700;
+}
+
+.success {
+  color: #176b31;
+}
+
+.error {
+  color: #9f1d1d;
+}
+
+.adminButton {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 50;
+  width: 54px;
+  height: 54px;
+  border: 2px solid #000;
+  border-radius: 50%;
+  background: #fff;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+}
+
+.adminOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.64);
+}
+
+.adminPanel {
+  width: min(100%, 860px);
+  max-height: 86vh;
+  overflow: hidden;
+  border: 2px solid #000;
+  border-radius: 28px;
+  padding: 24px;
+  background: #fff;
+}
+
+.adminHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.adminHeader h2 {
+  margin: 0;
+  font-size: clamp(24px, 4vw, 32px);
+}
+
+.adminHeader button {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  background: #111;
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.adminLogin {
+  display: grid;
+  gap: 16px;
+}
+
+.adminLogin label {
+  display: grid;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.adminLogin input {
+  width: 100%;
+  border: 1px solid #999;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font: inherit;
+  background: #f7f7f7;
+}
+
+.adminLogin button,
+.adminReview button {
+  width: fit-content;
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 18px;
+  background: #111;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.adminReview button {
+  background: #9f1d1d;
+  white-space: nowrap;
+}
+
+.adminReview button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.adminList {
+  display: grid;
+  gap: 14px;
+  max-height: 62vh;
+  overflow: auto;
+  padding-right: 6px;
+}
+
+.adminReview {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 18px;
+  align-items: start;
+  border: 1px solid #ddd;
+  border-radius: 18px;
+  padding: 16px;
+  background: #f7f7f7;
+}
+
+.adminReview h3 {
+  margin: 0 0 4px;
+}
+
+.adminReview span {
+  display: block;
+  margin-bottom: 10px;
+  color: #555;
+  font-size: 14px;
+}
+
+.adminReview p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.adminError {
+  margin-top: 16px;
+  color: #9f1d1d;
+  font-weight: 700;
+}
+
+@media (max-width: 1024px) {
+  .reviewsSwiper {
+    padding: 56px 0;
+  }
+
+  .review_slide {
+    height: 330px;
+  }
+
+  .review_slide_0 .review_card {
+    transform: scaleX(1.08);
+  }
+}
+
+@media (max-width: 768px) {
+  .reviewsPage {
+    padding-top: 72px;
+  }
+
+  .reviewsSwiper {
+    padding: 36px 0;
+  }
+
+  .review_slide {
+    height: 320px;
+  }
+
+  .review_card {
+    max-width: 320px;
+  }
+
+  .review_slide_0 .review_card {
+    transform: none;
+  }
+
+  .review_slide_1,
+  .review_slide_2 {
+    opacity: 1;
+    transform: scale(0.92);
+  }
+
+  .formSection {
+    margin-top: 36px;
+    padding: 24px;
+  }
+
+  .adminPanel {
+    border-radius: 20px;
+    padding: 20px;
+  }
+
+  .adminReview {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .review_slide {
+    height: 300px;
+  }
+
+  .review_card,
+  .review_slide_0 .review_card {
+    height: 280px;
+    padding: 20px;
+  }
+
+  .review_slide_0 h3 {
+    font-size: 24px;
+  }
+
+  .review_slide_0 p {
+    font-size: 16px;
+  }
+
+  .formSection {
+    border-radius: 20px;
+    padding: 20px;
+  }
+
+  .reviewForm button {
+    width: 100%;
+  }
+
+  .adminButton {
+    right: 14px;
+    bottom: 14px;
+  }
+
+  .adminLogin button,
+  .adminReview button {
+    width: 100%;
+  }
+}

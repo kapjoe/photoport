@@ -3,24 +3,88 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --page-padding: 24px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: 'Jura', sans-serif;
+  --font-mono: 'Jura', sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: #D9D9D9;
+  color: #0a0a0a;
+  font-family: 'Jura', Arial, Helvetica, sans-serif;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+@keyframes anim {
+  from {
+    left: -600px;
+  }
+  to {
+    left: 0;
+  }
+}
+
+@keyframes anim2 {
+  from {
+    left: 0;
+  }
+  to {
+    left: -600px;
+  }
+}
+
+.tr {
+  animation: anim2 0.45s;
+}
+
+.trans {
+  animation: anim 0.5s;
+}
+
+path {
+  transition: transform 0.25s;
+}
+
+.active path:nth-of-type(1) {
+  transform: rotate(45deg);
+  transform-origin: 10px -2px;
+}
+
+.active path:nth-of-type(2) {
+  display: none;
+}
+
+.active path:nth-of-type(3) {
+  transform: rotate(-45deg);
+  transform-origin: 9px 43px;
+}
+
+.swiper-wrapper {
+  transition-timing-function: linear !important;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --page-padding: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --page-padding: 14px;
+  }
 }

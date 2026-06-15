@@ -1,0 +1,250 @@
+.page {
+    width: min(100%, 1180px);
+    margin: 0 auto;
+    padding: 72px var(--page-padding) 48px;
+}
+
+.page h1 {
+    margin: 0 0 12px;
+    text-align: center;
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 700;
+}
+
+.lead {
+    max-width: 760px;
+    margin: 0 auto 34px;
+    text-align: center;
+    font-size: clamp(16px, 2vw, 20px);
+    line-height: 1.45;
+}
+
+.albumSection {
+    margin-bottom: 48px;
+}
+
+.albumCard {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    overflow: hidden;
+    border: 2px solid transparent;
+    border-radius: 22px;
+    padding: 0;
+    background: #111;
+    cursor: pointer;
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.2);
+}
+
+.albumCard img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.74;
+    transition: opacity 0.2s ease, transform 0.3s ease;
+}
+
+.albumCard:hover img,
+.activeAlbum img {
+    opacity: 0.92;
+    transform: scale(1.04);
+}
+
+.activeAlbum {
+    border-color: #111;
+}
+
+.albumCard span {
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: 18px;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 700;
+    text-align: left;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.65);
+}
+
+.galleryHeader {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.galleryHeader h2 {
+    margin: 0;
+    font-size: clamp(28px, 4vw, 44px);
+}
+
+.galleryHeader p {
+    margin: 0;
+}
+
+.gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.mosaicRow {
+    --gallery-row-height: clamp(520px, 62vw, 720px);
+    display: grid;
+    grid-template-columns: minmax(240px, 0.8fr) minmax(360px, 1.2fr);
+    grid-template-rows: var(--gallery-row-height);
+    gap: 24px;
+    height: var(--gallery-row-height);
+}
+
+.reversedRow {
+    grid-template-columns: minmax(360px, 1.2fr) minmax(240px, 0.8fr);
+}
+
+.reversedRow .verticalPhoto {
+    grid-column: 2;
+}
+
+.reversedRow .horizontalStack {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.verticalPhoto,
+.horizontalPhoto,
+.mobileVerticalPhoto,
+.mobileHorizontalPhoto {
+    position: relative;
+    overflow: hidden;
+    border: 0;
+    border-radius: 24px;
+    padding: 0;
+    background: #111;
+    cursor: pointer;
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.18);
+}
+
+.verticalPhoto img,
+.horizontalPhoto img,
+.mobileVerticalPhoto img,
+.mobileHorizontalPhoto img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    transition: transform 0.35s ease;
+}
+
+.verticalPhoto:hover img,
+.horizontalPhoto:hover img,
+.mobileVerticalPhoto:hover img,
+.mobileHorizontalPhoto:hover img {
+    transform: scale(1.035);
+}
+
+.verticalPhoto {
+    grid-column: 1;
+    grid-row: 1;
+    height: 100%;
+}
+
+.horizontalStack {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 24px;
+    grid-column: 2;
+    grid-row: 1;
+    height: 100%;
+    min-height: 0;
+}
+
+.horizontalPhoto {
+    height: 100%;
+    min-height: 0;
+}
+
+.mobileVerticals,
+.mobileHorizontalPhoto {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    .page {
+        padding-top: 64px;
+    }
+
+    .mosaicRow,
+    .reversedRow {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        height: auto;
+    }
+
+    .verticalPhoto,
+    .horizontalStack {
+        display: none;
+    }
+
+    .mobileVerticals {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .mobileVerticalPhoto {
+        display: block;
+        height: clamp(360px, 64vw, 520px);
+    }
+
+    .mobileHorizontalPhoto {
+        display: block;
+        grid-column: 1;
+        grid-row: 2;
+        height: clamp(220px, 42vw, 340px);
+    }
+}
+
+@media (max-width: 520px) {
+    .page {
+        padding-top: 58px;
+    }
+
+    .albumCard {
+        height: 220px;
+        border-radius: 18px;
+    }
+
+    .albumCard span {
+        font-size: 20px;
+    }
+
+    .galleryHeader {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .mosaicRow,
+    .mobileVerticals {
+        gap: 14px;
+    }
+
+    .verticalPhoto,
+    .horizontalPhoto,
+    .mobileVerticalPhoto,
+    .mobileHorizontalPhoto {
+        border-radius: 18px;
+    }
+
+    .mobileVerticalPhoto {
+        height: clamp(260px, 78vw, 420px);
+    }
+
+    .mobileHorizontalPhoto {
+        height: clamp(170px, 52vw, 260px);
+    }
+}

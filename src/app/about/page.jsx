@@ -3,23 +3,21 @@
 import s from "./page.module.css"
 import Image from 'next/image';
 
-const placeholder = '/image/photo-placeholder.svg';
-
 export default function Page() {
   return (
     <div className={s.about}>
       <h1 className={s.h1}>Обо мне</h1>
       <div className={s.imgR}>
         <p className={s.imgR_p}>Здравствуйте. Меня зовут Капралов Евгений Александрович. Я фотограф свадебной и ивент-направленности. Работаю в фотоиндустрии уже больше 4 лет и могу реализовать или помочь реализовать фотосъёмку разной направленности.</p>
-        <Image width={300} height={400} src={placeholder} alt="Портрет фотографа" />
+        <Image width={300} height={400} src="/image/about_1.png" alt="Портрет фотографа" />
       </div>
       <div className={s.imgL}>
         <p className={s.imgL_p}>Необходимо снять спортивное мероприятие? Запечатлить эмоции на свадьбе? Или пофотографироваться в центре Москвы? Это спокойно выполнимая работа! И если у вас проблемы с поиском локации или дефицит идей, то и здесь я могу предложить свою помощь.</p>
-        <Image width={300} height={400} src={placeholder} alt="Пример работы фотографа" />
+        <Image width={300} height={400} src="/image/About_2.png" alt="Пример работы фотографа" />
       </div>
       <div className={s.imgD}>
         <p className={s.imgD_p}><b>Какой у меня опыт работы?</b> <br /> Более 4 лет съёмок мероприятий, личных фотосессий и репортажей. В моём опыте есть свадьбы, ивенты, спортивные мероприятия, городские съёмки и помощь с подбором локаций.</p>
-        <Image width={300} height={400} src={placeholder} alt="Фотограф на мероприятии" />
+        <Image width={300} height={400} src="/image/About_3.png" alt="Фотограф на мероприятии" />
       </div>
     </div>
   )

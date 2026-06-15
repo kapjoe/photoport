@@ -1,0 +1,234 @@
+.pricePage {
+  max-width: 1000px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 28px var(--page-padding) 80px;
+  text-align: center;
+}
+
+.pricePage h1 {
+  margin-bottom: 18px;
+  font-size: clamp(24px, 4vw, 32px);
+  font-weight: 500;
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.tab {
+  min-width: 160px;
+  border: 1px solid #111;
+  border-radius: 12px;
+  padding: 9px 18px;
+  background: transparent;
+  color: #111;
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.activeTab,
+.tab:hover {
+  background: #111;
+  color: #d9d9d9;
+}
+
+.priceGrid {
+  display: grid;
+  grid-template-columns: minmax(260px, 360px) minmax(260px, 360px);
+  align-items: center;
+  justify-content: center;
+  gap: 40px 74px;
+  margin-bottom: 20px;
+}
+
+.sideCards {
+  display: grid;
+  gap: 40px;
+}
+
+.priceCard {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  color: #111;
+  background-color: #e8dfd8;
+  background-position: center;
+  background-size: cover;
+  width: 100%;
+}
+
+.largeCard {
+  min-height: 0;
+}
+
+.smallCard {
+  min-height: 0;
+}
+
+.cardOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(217, 217, 217, 0.58);
+}
+
+.cardContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 34px 24px 30px;
+  text-align: left;
+}
+
+.smallCard .cardContent {
+  padding: 28px 24px 24px;
+}
+
+.cardContent h2 {
+  margin: 0 0 24px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.includes {
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.includes b {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.includes ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.includes li::before {
+  content: "-";
+}
+
+.note {
+  margin: 4px 0 0;
+}
+
+.priceBlock {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  margin-top: 28px;
+  text-align: center;
+}
+
+.priceBlock span {
+  font-size: 16px;
+}
+
+.priceBlock strong {
+  max-width: 260px;
+  font-size: clamp(28px, 4vw, 36px);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.smallCard .priceBlock strong {
+  font-size: clamp(24px, 3vw, 30px);
+}
+
+.weddingFull {
+  aspect-ratio: 608 / 1024;
+  background-image: url("/image/wedding-full.jpg");
+}
+
+.weddingRegistry {
+  aspect-ratio: 700 / 900;
+  background-image: url("/image/wedding-registry.jpg");
+}
+
+.weddingPersonal {
+  aspect-ratio: 700 / 755;
+  background-image: url("/image/wedding-personal.jpg");
+}
+
+.eventHour {
+  aspect-ratio: 660 / 960;
+  background-image: url("/image/event-hour.jpg");
+}
+
+.eventFull {
+  aspect-ratio: 700 / 900;
+  background-image: url("/image/event-full.jpg");
+}
+
+.eventEdit {
+  aspect-ratio: 700 / 800;
+  background-image: url("/image/event-edit.jpg");
+}
+
+@media (max-width: 768px) {
+  .pricePage {
+    padding-top: 84px;
+  }
+
+  .tabs {
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    min-width: 140px;
+  }
+
+  .priceGrid {
+    grid-template-columns: minmax(0, 360px);
+    gap: 28px;
+  }
+
+  .sideCards {
+    gap: 28px;
+  }
+
+  .largeCard,
+  .smallCard {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .pricePage {
+    padding-top: 74px;
+  }
+
+  .tabs {
+    gap: 8px;
+  }
+
+  .tab {
+    min-width: 0;
+    flex: 1 1 130px;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .cardContent,
+  .smallCard .cardContent {
+    padding: 24px 18px;
+  }
+
+  .includes {
+    font-size: 14px;
+  }
+
+  .priceBlock strong {
+    font-size: 28px;
+  }
+}

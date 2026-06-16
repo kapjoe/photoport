@@ -43,6 +43,41 @@ const headers = {
   Authorization: `OAuth ${token}`,
 };
 
+const FETCH_RETRIES = 4;
+const FETCH_RETRY_DELAY_MS = 1500;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchWithRetry(url, options = {}, label = url) {
+  let lastError;
+
+  for (let attempt = 1; attempt <= FETCH_RETRIES; attempt += 1) {
+    try {
+      const response = await fetch(url, options);
+
+      if (response.ok || response.status < 500) {
+        return response;
+      }
+
+      lastError = new Error(`${label}: HTTP ${response.status}`);
+    } catch (error) {
+      lastError = error;
+    }
+
+    if (attempt < FETCH_RETRIES) {
+      const delay = FETCH_RETRY_DELAY_MS * attempt;
+      console.warn(`Повтор ${attempt}/${FETCH_RETRIES - 1} для ${label} через ${delay} мс...`);
+      await sleep(delay);
+    }
+  }
+
+  const cause = lastError?.cause?.code || lastError?.cause?.message || "";
+  const details = cause ? ` (${cause})` : "";
+  throw new Error(`Сетевой сбой при запросе ${label}${details}: ${lastError?.message || "fetch failed"}`);
+}
+
 function safeFileName(name) {
   return name
     .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "-")
@@ -84,8 +119,8 @@ async function getDisplayDimensions(buffer) {
   };
 }
 
-async function requestJson(url) {
-  const response = await fetch(url, { headers });
+async function requestJson(url, label = "Yandex Disk API") {
+  const response = await fetchWithRetry(url, { headers }, label);
 
   if (!response.ok) {
     const message = await response.text();
@@ -104,15 +139,6 @@ async function getResourceItems(diskPath) {
 }
 
 async function downloadFile(file, categoryId, albumSlug) {
-  const downloadInfo = await requestJson(
-    `${API_BASE}/resources/download?path=${encodeURIComponent(file.path)}`,
-  );
-  const response = await fetch(downloadInfo.href);
-
-  if (!response.ok) {
-    throw new Error(`Не удалось скачать ${file.name}: ${response.status}`);
-  }
-
   const extension = path.extname(file.name) || ".jpg";
   const baseName = safeFileName(path.basename(file.name, extension));
   const fileName = `${baseName}-${file.md5 || file.size}${extension.toLowerCase()}`;
@@ -140,6 +166,16 @@ async function downloadFile(file, categoryId, albumSlug) {
     // Файла еще нет в кеше, скачиваем ниже.
   }
 
+  const downloadInfo = await requestJson(
+    `${API_BASE}/resources/download?path=${encodeURIComponent(file.path)}`,
+    `ссылка на ${file.name}`,
+  );
+  const response = await fetchWithRetry(downloadInfo.href, {}, `скачивание ${file.name}`);
+
+  if (!response.ok) {
+    throw new Error(`Не удалось скачать ${file.name}: ${response.status}`);
+  }
+
   const arrayBuffer = await response.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
   await fs.writeFile(localPath, buffer);
@@ -161,19 +197,23 @@ async function syncAlbum(category, album) {
   const photos = [];
 
   for (const image of images) {
-    const cached = await downloadFile(image, category.id, albumSlug);
-    photos.push({
-      id: `${category.id}-${albumSlug}-${cached.md5 || cached.path}`,
-      name: cached.name,
-      publicPath: cached.publicPath,
-      size: cached.size,
-      mimeType: cached.mime_type,
-      modified: cached.modified,
-      width: cached.width,
-      height: cached.height,
-      orientation: cached.orientation,
-    });
-    console.log(`Синхронизировано: ${category.title} / ${album.name} / ${cached.name}`);
+    try {
+      const cached = await downloadFile(image, category.id, albumSlug);
+      photos.push({
+        id: `${category.id}-${albumSlug}-${cached.md5 || cached.path}`,
+        name: cached.name,
+        publicPath: cached.publicPath,
+        size: cached.size,
+        mimeType: cached.mime_type,
+        modified: cached.modified,
+        width: cached.width,
+        height: cached.height,
+        orientation: cached.orientation,
+      });
+      console.log(`Синхронизировано: ${category.title} / ${album.name} / ${cached.name}`);
+    } catch (error) {
+      console.error(`Пропущено: ${category.title} / ${album.name} / ${image.name} — ${error.message}`);
+    }
   }
 
   return {
@@ -218,5 +258,8 @@ async function main() {
 
 main().catch((error) => {
   console.error(error.message);
+  if (error.cause) {
+    console.error(error.cause);
+  }
   process.exit(1);
 });

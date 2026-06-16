@@ -48,9 +48,27 @@ npm run dev
 
 ```bash
 npm run sync:yandex
+npm run sync:yandex:list
+npm run sync:yandex:next
+npm run sync:yandex -- --category weddings --album "Свадьба Ивановых"
 ```
 
-Скрипт скачивает изображения в `public/cache/photos`, определяет ориентацию и создаёт `manifest.json`.
+Скрипт скачивает изображения в `public/cache/photos`, определяет ориентацию и обновляет `manifest.json` **после каждой папки-альбома**. Если синхронизация прервётся, уже скачанные альбомы останутся в кеше и в `manifest.json`.
+
+Для Vercel фото и `manifest.json` хранятся в Git. Синхронизацию запускайте локально, затем коммитьте изменения:
+
+```bash
+npm run sync:yandex:next
+git add public/cache/photos
+git commit -m "Sync next photo album"
+git push
+```
+
+На Vercel Build Command должен быть только:
+
+```bash
+npm run build
+```
 
 ## Отзывы
 
@@ -64,6 +82,8 @@ npm run build
 npm run start
 npm run lint
 npm run sync:yandex
+npm run sync:yandex:list
+npm run sync:yandex:next
 ```
 
 ## Что не попадает в Git
@@ -71,6 +91,5 @@ npm run sync:yandex
 - `.env.local` — секреты
 - `node_modules`, `.next`
 - `data/` — локальная база отзывов
-- `public/cache/photos/` — скачанные фото (только `.gitkeep`)
 
-После клонирования нужно заново выполнить `npm run sync:yandex`.
+Фото в `public/cache/photos/` коммитятся в Git, чтобы Vercel не скачивал их заново при каждом деплое.

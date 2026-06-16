@@ -25,6 +25,39 @@ const categories = [
   },
 ];
 
+function parseArgs(argv) {
+  const args = { category: null, album: null, next: false, list: false };
+
+  for (let index = 2; index < argv.length; index += 1) {
+    const value = argv[index];
+
+    if (value === "--next") {
+      args.next = true;
+      continue;
+    }
+
+    if (value === "--list") {
+      args.list = true;
+      continue;
+    }
+
+    if (value === "--category" && argv[index + 1]) {
+      args.category = argv[index + 1];
+      index += 1;
+      continue;
+    }
+
+    if (value === "--album" && argv[index + 1]) {
+      args.album = argv[index + 1];
+      index += 1;
+    }
+  }
+
+  return args;
+}
+
+const cli = parseArgs(process.argv);
+
 if (!token) {
   console.error("Не задан YANDEX_DISK_TOKEN. Создайте токен Яндекс.Диска и передайте его через переменную окружения.");
   process.exit(1);
@@ -190,6 +223,184 @@ async function downloadFile(file, categoryId, albumSlug) {
   };
 }
 
+async function loadManifest() {
+  try {
+    const content = await fs.readFile(manifestPath, "utf8");
+    const manifest = JSON.parse(content);
+
+    return {
+      generatedAt: manifest.generatedAt || new Date().toISOString(),
+      categories: manifest.categories || {},
+      photos: Array.isArray(manifest.photos) ? manifest.photos : [],
+    };
+  } catch {
+    return {
+      generatedAt: new Date().toISOString(),
+      categories: {},
+      photos: [],
+    };
+  }
+}
+
+function rebuildPhotosList(manifest) {
+  manifest.photos = Object.values(manifest.categories).flatMap((category) =>
+    (category.albums || []).flatMap((album) => album.photos || []),
+  );
+  manifest.generatedAt = new Date().toISOString();
+}
+
+function mergeAlbum(manifest, category, syncedAlbum) {
+  if (!manifest.categories[category.id]) {
+    manifest.categories[category.id] = {
+      id: category.id,
+      title: category.title,
+      diskPath: category.diskPath,
+      albums: [],
+    };
+  }
+
+  const albums = manifest.categories[category.id].albums;
+  const existingIndex = albums.findIndex(
+    (album) => album.id === syncedAlbum.id || album.diskPath === syncedAlbum.diskPath,
+  );
+
+  if (existingIndex >= 0) {
+    albums[existingIndex] = syncedAlbum;
+  } else {
+    albums.push(syncedAlbum);
+  }
+
+  rebuildPhotosList(manifest);
+}
+
+async function saveManifest(manifest) {
+  await fs.writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+}
+
+function getManifestAlbum(manifest, categoryId, album) {
+  const category = manifest.categories[categoryId];
+  if (!category) {
+    return null;
+  }
+
+  const albumSlug = safeFileName(album.name);
+
+  return (
+    category.albums?.find(
+      (entry) => entry.diskPath === album.path || safeFileName(entry.title) === albumSlug,
+    ) || null
+  );
+}
+
+function isAlbumSynced(manifest, categoryId, album, imageCount) {
+  const existing = getManifestAlbum(manifest, categoryId, album);
+
+  if (!existing?.photos?.length) {
+    return false;
+  }
+
+  return existing.photos.length >= imageCount;
+}
+
+async function countAlbumImages(album) {
+  const albumItems = await getResourceItems(album.path);
+
+  return albumItems.filter((item) => item.type === "file" && item.mime_type?.startsWith("image/")).length;
+}
+
+function resolveCategories() {
+  if (!cli.category) {
+    return enabledCategories;
+  }
+
+  const category = enabledCategories.find((entry) => entry.id === cli.category);
+
+  if (!category) {
+    throw new Error(`Неизвестная категория "${cli.category}". Доступно: ${enabledCategories.map((entry) => entry.id).join(", ")}`);
+  }
+
+  return [category];
+}
+
+async function findAlbumOnDisk(category, albumName) {
+  const categoryItems = await getResourceItems(category.diskPath);
+  const albums = categoryItems.filter((item) => item.type === "dir");
+  const normalizedName = safeFileName(albumName);
+
+  const album =
+    albums.find((entry) => entry.name === albumName) ||
+    albums.find((entry) => safeFileName(entry.name) === normalizedName) ||
+    albums.find((entry) => entry.name.toLowerCase() === albumName.toLowerCase());
+
+  if (!album) {
+    throw new Error(`Альбом "${albumName}" не найден в категории ${category.id}.`);
+  }
+
+  return album;
+}
+
+async function collectAlbumsToSync(manifest) {
+  if (cli.next) {
+    for (const category of enabledCategories) {
+      const categoryItems = await getResourceItems(category.diskPath);
+      const albums = categoryItems.filter((item) => item.type === "dir");
+
+      for (const album of albums) {
+        const imageCount = await countAlbumImages(album);
+
+        if (!isAlbumSynced(manifest, category.id, album, imageCount)) {
+          return [{ category, album }];
+        }
+      }
+    }
+
+    return [];
+  }
+
+  const selectedCategories = resolveCategories();
+  const queue = [];
+
+  for (const category of selectedCategories) {
+    const categoryItems = await getResourceItems(category.diskPath);
+    const albums = categoryItems.filter((item) => item.type === "dir");
+
+    if (cli.album) {
+      queue.push({ category, album: await findAlbumOnDisk(category, cli.album) });
+      continue;
+    }
+
+    for (const album of albums) {
+      queue.push({ category, album });
+    }
+  }
+
+  return queue;
+}
+
+async function listAlbums(manifest) {
+  for (const category of enabledCategories) {
+    console.log(`\n${category.title} (${category.id})`);
+
+    const categoryItems = await getResourceItems(category.diskPath);
+    const albums = categoryItems.filter((item) => item.type === "dir");
+
+    if (albums.length === 0) {
+      console.log("  (пусто)");
+      continue;
+    }
+
+    for (const album of albums) {
+      const imageCount = await countAlbumImages(album);
+      const existing = getManifestAlbum(manifest, category.id, album);
+      const synced = isAlbumSynced(manifest, category.id, album, imageCount);
+      const status = synced ? "готово" : "ожидает";
+      const cachedCount = existing?.photos?.length || 0;
+
+      console.log(`  [${status}] ${album.name} (${cachedCount}/${imageCount})`);
+    }
+  }
+}
+
 async function syncAlbum(category, album) {
   const albumSlug = safeFileName(album.name);
   const albumItems = await getResourceItems(album.path);
@@ -228,32 +439,34 @@ async function syncAlbum(category, album) {
 async function main() {
   await fs.mkdir(outputDir, { recursive: true });
 
-  const manifest = {
-    generatedAt: new Date().toISOString(),
-    categories: {},
-    photos: [],
-  };
+  const manifest = await loadManifest();
 
-  for (const category of enabledCategories) {
-    const categoryItems = await getResourceItems(category.diskPath);
-    const albums = categoryItems.filter((item) => item.type === "dir");
-    const syncedAlbums = [];
-
-    for (const album of albums) {
-      syncedAlbums.push(await syncAlbum(category, album));
-    }
-
-    manifest.categories[category.id] = {
-      id: category.id,
-      title: category.title,
-      diskPath: category.diskPath,
-      albums: syncedAlbums,
-    };
-    manifest.photos.push(...syncedAlbums.flatMap((album) => album.photos));
+  if (cli.list) {
+    await listAlbums(manifest);
+    return;
   }
 
-  await fs.writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
-  console.log(`Готово. Фото в кеше: ${manifest.photos.length}`);
+  const albumsToSync = await collectAlbumsToSync(manifest);
+
+  if (albumsToSync.length === 0) {
+    console.log("Все альбомы уже синхронизированы.");
+    console.log(`Фото в кеше: ${manifest.photos.length}`);
+    return;
+  }
+
+  for (const { category, album } of albumsToSync) {
+    console.log(`\nАльбом: ${category.title} / ${album.name}`);
+    const syncedAlbum = await syncAlbum(category, album);
+    mergeAlbum(manifest, category, syncedAlbum);
+    await saveManifest(manifest);
+    console.log(`Сохранено в manifest: ${category.title} / ${album.name} (${syncedAlbum.photos.length} фото)`);
+
+    if (cli.next) {
+      break;
+    }
+  }
+
+  console.log(`\nГотово. Фото в кеше: ${manifest.photos.length}`);
 }
 
 main().catch((error) => {

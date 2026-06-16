@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "sync:yandex": "node scripts/sync-yandex-disk.mjs"
+    "sync:yandex": "node scripts/sync-yandex-disk.mjs",
+    "sync:yandex:next": "node scripts/sync-yandex-disk.mjs --next",
+    "sync:yandex:list": "node scripts/sync-yandex-disk.mjs --list"
   },
   "dependencies": {
     "better-sqlite3": "^12.10.0",

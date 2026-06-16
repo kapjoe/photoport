@@ -27,10 +27,6 @@ Desktop.ini
 # local data
 /data/
 
-# photo cache (sync via npm run sync:yandex)
-/public/cache/photos/*
-!/public/cache/photos/.gitkeep
-
 # logs
 /logs/
 *.log

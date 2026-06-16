@@ -1,6 +1,6 @@
 'use client';
 
-import Image from "next/image";
+import PortfolioImage from "@/components/PortfolioImage";
 import { useEffect } from "react";
 import s from "./Lightbox.module.css";
 
@@ -53,7 +53,7 @@ export default function Lightbox({ photos, activeIndex, onClose, onNext, onPrev 
         </button>
       )}
       <div className={s.imageWrap} onClick={(event) => event.stopPropagation()}>
-        <Image
+        <PortfolioImage
           src={activePhoto.publicPath || activePhoto.image}
           alt={activePhoto.name || activePhoto.alt || "Фотография"}
           width={activePhoto.width || 1200}

@@ -26,7 +26,7 @@ const categories = [
 ];
 
 function parseArgs(argv) {
-  const args = { category: null, album: null, next: false, list: false };
+  const args = { category: null, album: null, next: false, list: false, metadataOnly: false };
 
   for (let index = 2; index < argv.length; index += 1) {
     const value = argv[index];
@@ -38,6 +38,11 @@ function parseArgs(argv) {
 
     if (value === "--list") {
       args.list = true;
+      continue;
+    }
+
+    if (value === "--metadata-only") {
+      args.metadataOnly = true;
       continue;
     }
 
@@ -171,7 +176,54 @@ async function getResourceItems(diskPath) {
   return resources?._embedded?.items || [];
 }
 
-async function downloadFile(file, categoryId, albumSlug) {
+function toApiPublicPath(diskPath) {
+  return `/api/photos/image/${Buffer.from(diskPath, "utf8").toString("base64url")}`;
+}
+
+function findExistingPhoto(manifest, categoryId, album, file) {
+  const albumEntry = getManifestAlbum(manifest, categoryId, album);
+  const albumSlug = safeFileName(album.name);
+  const photoId = `${categoryId}-${albumSlug}-${file.md5 || file.path}`;
+
+  return albumEntry?.photos?.find((photo) => photo.id === photoId) || null;
+}
+
+async function processPhotoFile(file, categoryId, albumSlug, existingPhoto = null) {
+  if (cli.metadataOnly) {
+    const publicPath = toApiPublicPath(file.path);
+
+    if (existingPhoto?.width && existingPhoto?.height) {
+      return {
+        ...file,
+        publicPath,
+        width: existingPhoto.width,
+        height: existingPhoto.height,
+        orientation: existingPhoto.orientation || getOrientation(existingPhoto),
+      };
+    }
+
+    const downloadInfo = await requestJson(
+      `${API_BASE}/resources/download?path=${encodeURIComponent(file.path)}`,
+      `ссылка на ${file.name}`,
+    );
+    const response = await fetchWithRetry(downloadInfo.href, {}, `чтение ${file.name}`);
+
+    if (!response.ok) {
+      throw new Error(`Не удалось прочитать ${file.name}: ${response.status}`);
+    }
+
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const dimensions = await getDisplayDimensions(buffer);
+
+    return {
+      ...file,
+      publicPath,
+      width: dimensions.width || null,
+      height: dimensions.height || null,
+      orientation: getOrientation(dimensions),
+    };
+  }
+
   const extension = path.extname(file.name) || ".jpg";
   const baseName = safeFileName(path.basename(file.name, extension));
   const fileName = `${baseName}-${file.md5 || file.size}${extension.toLowerCase()}`;
@@ -401,7 +453,7 @@ async function listAlbums(manifest) {
   }
 }
 
-async function syncAlbum(category, album) {
+async function syncAlbum(category, album, manifest) {
   const albumSlug = safeFileName(album.name);
   const albumItems = await getResourceItems(album.path);
   const images = albumItems.filter((item) => item.type === "file" && item.mime_type?.startsWith("image/"));
@@ -409,7 +461,12 @@ async function syncAlbum(category, album) {
 
   for (const image of images) {
     try {
-      const cached = await downloadFile(image, category.id, albumSlug);
+      const cached = await processPhotoFile(
+        image,
+        category.id,
+        albumSlug,
+        findExistingPhoto(manifest, category.id, album, image),
+      );
       photos.push({
         id: `${category.id}-${albumSlug}-${cached.md5 || cached.path}`,
         name: cached.name,
@@ -456,7 +513,7 @@ async function main() {
 
   for (const { category, album } of albumsToSync) {
     console.log(`\nАльбом: ${category.title} / ${album.name}`);
-    const syncedAlbum = await syncAlbum(category, album);
+    const syncedAlbum = await syncAlbum(category, album, manifest);
     mergeAlbum(manifest, category, syncedAlbum);
     await saveManifest(manifest);
     console.log(`Сохранено в manifest: ${category.title} / ${album.name} (${syncedAlbum.photos.length} фото)`);

@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "sync:yandex": "node scripts/sync-yandex-disk.mjs",
-    "sync:yandex:next": "node scripts/sync-yandex-disk.mjs --next",
+    "sync:yandex:manifest": "node scripts/sync-yandex-disk.mjs --metadata-only",
+    "sync:yandex:next": "node scripts/sync-yandex-disk.mjs --next --metadata-only",
     "sync:yandex:list": "node scripts/sync-yandex-disk.mjs --list"
   },
   "dependencies": {

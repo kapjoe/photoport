@@ -1,6 +1,7 @@
 'use client';
 import s from "./page.module.css"
 import Image from "next/image";
+import PortfolioImage from "@/components/PortfolioImage";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import 'swiper/css';
@@ -105,7 +106,7 @@ const MainPage = () => {
                   onClick={() => setActivePhotoIndex(photos.findIndex((photo) => photo.id === card.id))}
                   aria-label={`Открыть фото ${card.alt}`}
                 >
-                  <Image
+                  <PortfolioImage
                     src={card.image}
                     alt={card.alt}
                     fill

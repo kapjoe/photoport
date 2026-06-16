@@ -27,6 +27,10 @@ Desktop.ini
 # local data
 /data/
 
+# photo cache (production uses Yandex proxy; only manifest.json is committed)
+/public/cache/photos/*
+!/public/cache/photos/manifest.json
+
 # logs
 /logs/
 *.log

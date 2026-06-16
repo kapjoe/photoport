@@ -1,6 +1,6 @@
 'use client';
 
-import Image from "next/image";
+import PortfolioImage from "@/components/PortfolioImage";
 import { useEffect, useMemo, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
@@ -125,7 +125,7 @@ export default function PhotoSessionsPage({ categoryId, title }) {
                   setActivePhotoIndex(null);
                 }}
               >
-                <Image
+                <PortfolioImage
                   src={album.cover?.publicPath || "/image/photo-placeholder.svg"}
                   alt={album.title}
                   width={album.cover?.width || 700}
@@ -154,7 +154,7 @@ export default function PhotoSessionsPage({ categoryId, title }) {
                   key={photo.id}
                   onClick={() => setActivePhotoIndex(getPhotoIndex(photos, photo))}
                 >
-                  <Image
+                  <PortfolioImage
                     src={photo.publicPath}
                     alt={photo.name || activeAlbum.title}
                     width={photo.width || 700}
@@ -169,7 +169,7 @@ export default function PhotoSessionsPage({ categoryId, title }) {
                 type="button"
                 onClick={() => setActivePhotoIndex(getPhotoIndex(photos, row.reversed ? row.verticals[1] || row.verticals[0] : row.verticals[0]))}
               >
-                <Image
+                <PortfolioImage
                   src={(row.reversed ? row.verticals[1] || row.verticals[0] : row.verticals[0]).publicPath}
                   alt={(row.reversed ? row.verticals[1] || row.verticals[0] : row.verticals[0]).name || activeAlbum.title}
                   width={(row.reversed ? row.verticals[1] || row.verticals[0] : row.verticals[0]).width || 700}
@@ -185,7 +185,7 @@ export default function PhotoSessionsPage({ categoryId, title }) {
                   key={photo.id}
                   onClick={() => setActivePhotoIndex(getPhotoIndex(photos, photo))}
                 >
-                  <Image
+                  <PortfolioImage
                     src={photo.publicPath}
                     alt={photo.name || activeAlbum.title}
                     width={photo.width || 900}
@@ -200,7 +200,7 @@ export default function PhotoSessionsPage({ categoryId, title }) {
                 type="button"
                 onClick={() => setActivePhotoIndex(getPhotoIndex(photos, row.horizontals[0]))}
               >
-                <Image
+                <PortfolioImage
                   src={row.horizontals[0].publicPath}
                   alt={row.horizontals[0].name || activeAlbum.title}
                   width={row.horizontals[0].width || 900}

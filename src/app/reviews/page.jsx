@@ -179,15 +179,27 @@ export default function Page() {
     setDeletingReviewId(null);
   };
 
-  const unlockAdminPanel = (event) => {
+  const unlockAdminPanel = async (event) => {
     event.preventDefault();
 
-    if (admin.password !== 'kapj12345') {
-      setAdmin((current) => ({ ...current, error: 'Неверный пароль.' }));
-      return;
-    }
+    try {
+      const response = await fetch('/api/reviews/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password: admin.password }),
+      });
+      const data = await response.json();
 
-    setAdmin((current) => ({ ...current, isUnlocked: true, error: '' }));
+      if (!response.ok) {
+        throw new Error(data.error || 'Неверный пароль.');
+      }
+
+      setAdmin((current) => ({ ...current, isUnlocked: true, error: '' }));
+    } catch (unlockError) {
+      setAdmin((current) => ({ ...current, error: unlockError.message }));
+    }
   };
 
   const deleteReviewItem = async (review) => {

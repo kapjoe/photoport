@@ -1,74 +1,70 @@
-import Database from "better-sqlite3";
-import fs from "node:fs";
-import path from "node:path";
+import { getReviewsDiskPath, readDiskJson, writeDiskJson } from "./yandex-disk";
 
-const dbPath = process.env.SQLITE_PATH || path.join(process.cwd(), "data", "reviews.sqlite");
+const EMPTY_STORE = { reviews: [], nextId: 1 };
 
-let db;
+async function loadStore() {
+  const data = await readDiskJson(getReviewsDiskPath());
 
-function getDb() {
-  if (!db) {
-    fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-    db = new Database(dbPath);
-    db.pragma("journal_mode = WAL");
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS reviews (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        event_date TEXT NOT NULL,
-        event_type TEXT NOT NULL,
-        text TEXT NOT NULL,
-        created_at TEXT NOT NULL DEFAULT (datetime('now'))
-      );
-    `);
+  if (!data || !Array.isArray(data.reviews)) {
+    return { ...EMPTY_STORE };
   }
 
-  return db;
+  const nextId = Number.isInteger(data.nextId) && data.nextId > 0
+    ? data.nextId
+    : data.reviews.reduce((maxId, review) => Math.max(maxId, Number(review.id) || 0), 0) + 1;
+
+  return {
+    reviews: data.reviews,
+    nextId,
+  };
 }
 
-export function getReviews() {
-  return getDb()
-    .prepare(`
-      SELECT
-        id,
-        name,
-        event_date AS eventDate,
-        event_type AS eventType,
-        text,
-        created_at AS createdAt
-      FROM reviews
-      ORDER BY created_at DESC, id DESC
-    `)
-    .all();
+async function saveStore(store) {
+  await writeDiskJson(getReviewsDiskPath(), store);
 }
 
-export function addReview({ name, eventDate, eventType, text }) {
-  const result = getDb()
-    .prepare(`
-      INSERT INTO reviews (name, event_date, event_type, text)
-      VALUES (@name, @eventDate, @eventType, @text)
-    `)
-    .run({ name, eventDate, eventType, text });
+export async function getReviews() {
+  const store = await loadStore();
 
-  return getDb()
-    .prepare(`
-      SELECT
-        id,
-        name,
-        event_date AS eventDate,
-        event_type AS eventType,
-        text,
-        created_at AS createdAt
-      FROM reviews
-      WHERE id = ?
-    `)
-    .get(result.lastInsertRowid);
+  return [...store.reviews].sort((left, right) => {
+    const dateCompare = String(right.createdAt || "").localeCompare(String(left.createdAt || ""));
+
+    if (dateCompare !== 0) {
+      return dateCompare;
+    }
+
+    return Number(right.id) - Number(left.id);
+  });
 }
 
-export function deleteReview(id) {
-  const result = getDb()
-    .prepare("DELETE FROM reviews WHERE id = ?")
-    .run(id);
+export async function addReview({ name, eventDate, eventType, text }) {
+  const store = await loadStore();
+  const review = {
+    id: store.nextId,
+    name,
+    eventDate,
+    eventType,
+    text,
+    createdAt: new Date().toISOString(),
+  };
 
-  return result.changes > 0;
+  store.reviews.push(review);
+  store.nextId += 1;
+  await saveStore(store);
+
+  return review;
+}
+
+export async function deleteReview(id) {
+  const store = await loadStore();
+  const index = store.reviews.findIndex((review) => review.id === id);
+
+  if (index === -1) {
+    return false;
+  }
+
+  store.reviews.splice(index, 1);
+  await saveStore(store);
+
+  return true;
 }

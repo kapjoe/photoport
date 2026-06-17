@@ -3,7 +3,7 @@
 ## Стек
 
 - **Next.js 16** (App Router) + **React 19**
-- **SQLite** (`better-sqlite3`) — отзывы
+- **Яндекс.Диск API** — отзывы (JSON-файл)
 - **Яндекс.Диск API** — фотографии с локальным кешем
 - **Swiper** — слайдеры
 - **CSS Modules** + шрифт **Jura**
@@ -30,7 +30,9 @@ npm run dev
 
 - `YANDEX_DISK_TOKEN` — OAuth-токен Яндекс.Диска;
 - `YANDEX_DISK_WEDDINGS_PATH` — папка со свадебными фотосессиями;
-- `YANDEX_DISK_EVENTS_PATH` — папка с остальными мероприятиями.
+- `YANDEX_DISK_EVENTS_PATH` — папка с остальными мероприятиями;
+- `YANDEX_DISK_REVIEWS_PATH` — путь к JSON-файлу с отзывами (по умолчанию `/portfolio/reviews.json`);
+- `ADMIN_PASSWORD` — пароль для удаления отзывов в админ-панели.
 
 Ожидаемая структура на Яндекс.Диске:
 
@@ -54,7 +56,9 @@ npm run sync:yandex
 
 ## Отзывы
 
-Регистрации нет. Форма на `/reviews`: имя, дата, тип мероприятия, текст. Данные сохраняются в `data/reviews.sqlite`.
+Регистрации нет. Форма на `/reviews`: имя, дата, тип мероприятия, текст. Данные сохраняются в JSON-файл на Яндекс.Диске (`YANDEX_DISK_REVIEWS_PATH`). Файл создаётся автоматически при первом отзыве.
+
+На Vercel нужно добавить в Environment Variables те же переменные, что и в `.env.local`: `YANDEX_DISK_TOKEN`, `YANDEX_DISK_REVIEWS_PATH`, `ADMIN_PASSWORD`.
 
 ## Команды
 
@@ -70,7 +74,6 @@ npm run sync:yandex
 
 - `.env.local` — секреты
 - `node_modules`, `.next`
-- `data/` — локальная база отзывов
 - `public/cache/photos/` — скачанные фото (только `.gitkeep`)
 
 После клонирования нужно заново выполнить `npm run sync:yandex`.
